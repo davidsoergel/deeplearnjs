@@ -38,7 +38,7 @@ export class FileDataSource extends DataSource {
     super();
   }
 
-  getStream(): ByteStream {
+  async getStream(): Promise<ByteStream> {
     return new FileReaderStream(this.input, this.options);
   }
 }

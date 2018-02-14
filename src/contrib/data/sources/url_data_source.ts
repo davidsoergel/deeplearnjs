@@ -18,7 +18,7 @@
 
 import {DataSource} from '../datasource';
 import {ByteStream} from '../streams/byte_stream';
-import {URLStream} from '../streams/url_stream';
+import {createUrlReaderStream} from '../streams/url_stream';
 
 /*
  * Represents a URL readable as a stream of binary data chunks.
@@ -41,7 +41,7 @@ export class URLDataSource extends DataSource {
   // will download the URL anew for each call to getStream().  Since we have
   // to treat the downloaded file as a blob anyway, we may as well retain it--
   // but that raises GC issues.  Also we may want a persistent disk cache.
-  getStream(): ByteStream {
-    return new URLStream(this.url, this.options);
+  async getStream(): Promise<ByteStream> {
+    return createUrlReaderStream(this.url, this.options);
   }
 }

@@ -44,7 +44,7 @@ export class TextLineDataset extends Dataset {
   }
 
   async getStream(): Promise<DataStream<DatasetElement>> {
-    const readStream = this.input.getStream();
+    const readStream = await this.input.getStream();
     const utf8Stream = readStream.decodeUTF8();
     const lineStream = utf8Stream.split('\n');
     return lineStream.map(x => ({[this.columnName]: x}));
