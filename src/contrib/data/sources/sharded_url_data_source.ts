@@ -36,7 +36,7 @@ export class ShardedURLDataSource extends DataSource {
       protected readonly url: RequestInfo,
       protected readonly integerDigits: number,
       protected readonly urlSuffix: string,
-      protected readonly startFrom: number = 1,
+      protected readonly startFrom: number = 0,
       protected readonly fetchOptions: RequestInit = {},
       protected readonly fileOptions = {}) {
     // TODO(soergel): Simpler config, e.g via a regex or printf-like pattern.

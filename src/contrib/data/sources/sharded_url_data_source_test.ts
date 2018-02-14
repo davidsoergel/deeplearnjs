@@ -21,13 +21,13 @@ import * as fetchMock from 'fetch-mock';
 import {ShardedURLDataSource} from './sharded_url_data_source';
 
 const testString = 'abcdefghijklmnopqrstuvwxyz';
-const url = 'sharded_url';
+const url = 'sharded_url.';
 
 function setupFetchMock() {
   // use an end: matcher so that we match both foo and http://localhost:xxx/foo
-  fetchMock.get(`end:${url}.0`, testString.slice(0, 12));
-  fetchMock.get(`end:${url}.1`, testString.slice(12, 17));
-  fetchMock.get(`end:${url}.2`, testString.slice(17));
+  fetchMock.get(`end:${url}001.foo`, testString.slice(0, 12));
+  fetchMock.get(`end:${url}002.foo`, testString.slice(12, 17));
+  fetchMock.get(`end:${url}003.foo`, testString.slice(17));
   fetchMock.get('*', 404);
 }
 
@@ -37,9 +37,10 @@ describe('ShardedUrlDataSource', () => {
   it('Reads the entire file and then closes the stream, given a string url',
      done => {
        setupFetchMock();
-       const readStreamPromise = new ShardedURLDataSource(url, 5, '', 1, {}, {
-                                   chunkSize: 10
-                                 }).getStream();
+       const readStreamPromise =
+           new ShardedURLDataSource(url, 3, '.foo', 1, {}, {
+             chunkSize: 10
+           }).getStream();
        // Note there will be separate chunks per shard, and also separate chunks
        // based on the chunksize.  Thus we expect the chunks:
        // "abcdefghij" "kl" "mnopq" "rstuvwxyz"
@@ -58,9 +59,9 @@ describe('ShardedUrlDataSource', () => {
      done => {
        setupFetchMock();
        const readStreamPromise =
-           new ShardedURLDataSource(new Request(url),5, '', 1, {}, {
-            chunkSize: 10
-          }).getStream();
+           new ShardedURLDataSource(new Request(url), 3, '.foo', 1, {}, {
+             chunkSize: 10
+           }).getStream();
        // Note there will be separate chunks per shard, and also separate chunks
        // based on the chunksize.  Thus we expect the chunks:
        // "abcdefghij" "kl" "mnopq" "rstuvwxyz"
@@ -77,10 +78,9 @@ describe('ShardedUrlDataSource', () => {
 
   it('Reads chunks in order', done => {
     setupFetchMock();
-    const readStreamPromise =
-        new ShardedURLDataSource(url, 5, '', 1, {}, {
-          chunkSize: 10
-        }).getStream();
+    const readStreamPromise = new ShardedURLDataSource(url, 3, '.foo', 1, {}, {
+                                chunkSize: 10
+                              }).getStream();
     readStreamPromise.then(readStream => readStream.collectRemaining())
         .then(result => {
           expect(result[0][0]).toEqual('a'.charCodeAt(0));
@@ -94,10 +94,9 @@ describe('ShardedUrlDataSource', () => {
 
   it('Reads chunks of expected sizes', done => {
     setupFetchMock();
-    const readStreamPromise =
-        new ShardedURLDataSource(url, 5, '', 1, {}, {
-          chunkSize: 10
-        }).getStream();
+    const readStreamPromise = new ShardedURLDataSource(url, 3, '.foo', 1, {}, {
+                                chunkSize: 10
+                              }).getStream();
     readStreamPromise.then(readStream => readStream.collectRemaining())
         .then(result => {
           expect(result[0].length).toEqual(10);
